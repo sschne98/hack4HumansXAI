@@ -14,7 +14,6 @@ export default function LoginPage() {
     email: '',
     password: '',
     displayName: '',
-    department: '',
   });
   const { toast } = useToast();
 
@@ -119,20 +118,6 @@ export default function LoginPage() {
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="department" className="block text-sm font-medium text-foreground mb-2">
-                    Department
-                  </Label>
-                  <Input
-                    id="department"
-                    name="department"
-                    type="text"
-                    placeholder="Engineering"
-                    value={formData.department}
-                    onChange={handleInputChange}
-                    data-testid="input-department"
-                  />
-                </div>
               </>
             )}
 

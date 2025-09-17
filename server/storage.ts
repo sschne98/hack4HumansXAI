@@ -49,7 +49,6 @@ export class MemStorage implements IStorage {
       ...insertUser,
       id,
       avatar: insertUser.avatar || null,
-      department: insertUser.department || null,
       statusMessage: insertUser.statusMessage || "Available",
       isOnline: false,
       lastSeen: new Date(),

@@ -32,8 +32,7 @@ export default function NewChatModal({ open, onClose, onStartChat }: NewChatModa
       const search = searchQuery.toLowerCase();
       return (
         u.displayName.toLowerCase().includes(search) ||
-        u.email.toLowerCase().includes(search) ||
-        u.department?.toLowerCase().includes(search)
+        u.email.toLowerCase().includes(search)
       );
     });
 
@@ -65,7 +64,7 @@ export default function NewChatModal({ open, onClose, onStartChat }: NewChatModa
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search by name, email, or department..."
+              placeholder="Search by name or email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -123,11 +122,6 @@ export default function NewChatModal({ open, onClose, onStartChat }: NewChatModa
                       <p className="text-xs text-muted-foreground truncate">
                         {user.email}
                       </p>
-                      {user.department && (
-                        <p className="text-xs text-primary">
-                          {user.department}
-                        </p>
-                      )}
                     </div>
                   </div>
                 ))}

@@ -23,7 +23,6 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps) {
   const [formData, setFormData] = useState({
     displayName: '',
     statusMessage: '',
-    department: '',
   });
 
   useEffect(() => {
@@ -31,7 +30,6 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps) {
       setFormData({
         displayName: user.displayName || '',
         statusMessage: user.statusMessage || '',
-        department: user.department || '',
       });
     }
   }, [user]);
@@ -160,20 +158,6 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps) {
               />
             </div>
 
-            <div>
-              <Label htmlFor="department" className="block text-sm font-medium mb-2">
-                Department
-              </Label>
-              <Input
-                id="department"
-                name="department"
-                type="text"
-                value={formData.department}
-                onChange={handleInputChange}
-                placeholder="Engineering"
-                data-testid="input-department"
-              />
-            </div>
           </div>
 
           {/* Action Buttons */}
