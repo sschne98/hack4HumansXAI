@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { OnlineStatus } from '@/components/ui/online-status';
-import { Send, Paperclip, MapPin, Mic, Video, Phone, Info, CheckCheck, MessageSquare } from 'lucide-react';
+import { Send, Paperclip, MapPin, Mic, Video, Phone, Info, CheckCheck, MessageSquare, Eye, EyeOff } from 'lucide-react';
 import LocationModal from './location-modal';
 import PIIWarningModal from './pii-warning-modal';
+import { detectPII } from '@/lib/pii-detection';
 import type { MessageWithSender, ConversationWithLastMessage } from '@shared/schema';
 
 interface ChatAreaProps {
@@ -24,6 +25,7 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
   const [pendingMessage, setPendingMessage] = useState('');
   const [piiWarningData, setPIIWarningData] = useState<{ title: string; message: string } | null>(null);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [revealedMessages, setRevealedMessages] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: conversations = [] } = useQuery<ConversationWithLastMessage[]>({
@@ -122,6 +124,29 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
       // Stop typing indicator immediately if input is empty
       sendTypingIndicator(conversationId, false);
     }
+  };
+
+  // Check if message contains profanity
+  const messageContainsProfanity = (content: string) => {
+    const piiResult = detectPII(content);
+    return piiResult.detectedTypes.includes('profanity');
+  };
+
+  // Handle revealing a blurred message
+  const handleRevealMessage = (messageId: string) => {
+    setRevealedMessages(prev => new Set(prev).add(messageId));
+  };
+
+  // Check if message should be blurred
+  const shouldBlurMessage = (msg: MessageWithSender) => {
+    // Only blur incoming messages (not own messages)
+    if (msg.senderId === user?.id) return false;
+    
+    // Only blur text messages with profanity
+    if (msg.messageType === 'location') return false;
+    
+    // Check if message contains profanity and hasn't been revealed
+    return messageContainsProfanity(msg.content) && !revealedMessages.has(msg.id);
   };
 
   const handleShareLocation = (location: { lat: number; lng: number; address: string }) => {
@@ -286,6 +311,31 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
                         >
                           Open in Maps
                         </Button>
+                      </div>
+                    ) : shouldBlurMessage(msg) ? (
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <p className="text-foreground blur-sm select-none pointer-events-none">
+                            {msg.content}
+                          </p>
+                          <div className="absolute inset-0 bg-black/10 rounded" />
+                        </div>
+                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                          <EyeOff className="h-4 w-4" />
+                          <span>This message may contain inappropriate content</span>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleRevealMessage(msg.id)}
+                            className="text-xs"
+                            data-testid={`button-reveal-${msg.id}`}
+                          >
+                            <Eye className="h-3 w-3 mr-1" />
+                            Show Message
+                          </Button>
+                        </div>
                       </div>
                     ) : (
                       <p className={isOwnMessage ? 'text-white' : 'text-foreground'}>
