@@ -373,10 +373,13 @@ export default function ChatArea({ conversationId, onBackToSidebar }: ChatAreaPr
                             data-testid={`status-scam-warning-${msg.id}`}
                           >
                             <div className="flex items-start space-x-2">
-                              <AlertTriangle className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                              <div className="flex items-center space-x-1 flex-shrink-0">
+                                <AlertTriangle className="h-4 w-4 text-orange-600" />
+                                <span className="text-sm font-medium text-orange-800">DigiGuard</span>
+                              </div>
                               <div className="space-y-1">
                                 <div className="text-sm font-medium text-orange-800">
-                                  🚨 DigiGuard Safety Alert
+                                  🚨 Safety Alert
                                 </div>
                                 <div className="text-xs text-orange-700">
                                   This message looks like it might be trying to trick you. Never give money or personal information to people you don't know well. If something sounds too good to be true, it usually is!
