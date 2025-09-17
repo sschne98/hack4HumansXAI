@@ -25,7 +25,12 @@ export default function LoginPage() {
       if (isLoginMode) {
         await login(formData.email, formData.password);
       } else {
-        await register(formData);
+        // Auto-generate username from email
+        const username = formData.email.split('@')[0];
+        await register({
+          ...formData,
+          username,
+        });
       }
     } catch (error: any) {
       toast({
