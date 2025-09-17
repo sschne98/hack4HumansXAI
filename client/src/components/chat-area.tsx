@@ -376,10 +376,10 @@ export default function ChatArea({ conversationId, onBackToSidebar }: ChatAreaPr
                               <AlertTriangle className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
                               <div className="space-y-1">
                                 <div className="text-sm font-medium text-orange-800">
-                                  🚨 Potential Scam Detected
+                                  🚨 DigiGuard Safety Alert
                                 </div>
                                 <div className="text-xs text-orange-700">
-                                  This message contains patterns commonly used in scams. Be cautious of requests for money, personal information, or urgent actions.
+                                  This message looks like it might be trying to trick you. Never give money or personal information to people you don't know well. If something sounds too good to be true, it usually is!
                                 </div>
                               </div>
                             </div>
