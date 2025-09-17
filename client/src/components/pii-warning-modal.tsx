@@ -1,7 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
+import customShield from "@assets/generated-image (12)_1758122670225.png";
 
 interface PIIWarningModalProps {
   open: boolean;
@@ -22,8 +23,12 @@ export default function PIIWarningModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md rounded-2xl shadow-xl" data-testid="pii-warning-modal">
         <DialogHeader className="text-center pb-2">
-          <div className="mx-auto mb-3 w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-            <Shield className="h-8 w-8 text-blue-600" />
+          <div className="mx-auto mb-3 w-16 h-16 rounded-full flex items-center justify-center">
+            <img 
+              src={customShield} 
+              alt="DigiGuard Shield" 
+              className="w-full h-full object-contain rounded-full"
+            />
           </div>
           <DialogTitle className="text-xl font-semibold text-gray-800 mb-1">
             Hey! Let's keep you safe 
