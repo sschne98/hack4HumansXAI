@@ -369,19 +369,21 @@ export default function ChatArea({ conversationId, onBackToSidebar }: ChatAreaPr
                         
                         {shouldShowScamWarning(msg) && (
                           <div 
-                            className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg p-3 mt-2"
+                            className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg p-3 sm:p-4 mt-2 mx-1 sm:mx-0"
                             data-testid={`status-scam-warning-${msg.id}`}
                           >
-                            <div className="flex items-start space-x-2">
-                              <div className="flex items-center space-x-1 flex-shrink-0">
-                                <AlertTriangle className="h-4 w-4 text-orange-600" />
-                                <span className="text-sm font-medium text-orange-800">DigiGuard</span>
+                            {/* Mobile-optimized layout */}
+                            <div className="flex flex-col sm:flex-row sm:items-start space-y-2 sm:space-y-0 sm:space-x-3">
+                              {/* Header with icon and branding */}
+                              <div className="flex items-center space-x-2 flex-shrink-0">
+                                <AlertTriangle className="h-5 w-5 sm:h-4 sm:w-4 text-orange-600" />
+                                <span className="text-sm sm:text-sm font-semibold text-orange-800">DigiGuard</span>
+                                <span className="text-sm sm:text-sm font-semibold text-orange-800">🚨 Safety Alert</span>
                               </div>
-                              <div className="space-y-1">
-                                <div className="text-sm font-medium text-orange-800">
-                                  🚨 Safety Alert
-                                </div>
-                                <div className="text-xs text-orange-700">
+                              
+                              {/* Warning content */}
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm sm:text-xs text-orange-700 leading-relaxed">
                                   This message looks like it might be trying to trick you. Never give money or personal information to people you don't know well. If something sounds too good to be true, it usually is!
                                 </div>
                               </div>
