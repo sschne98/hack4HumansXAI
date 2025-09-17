@@ -5,6 +5,7 @@ import session from "express-session";
 import { storage } from "./storage";
 import { insertUserSchema, insertMessageSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
+import { detectPIIWithAI, getAgeAppropriatePIIWarning } from "./ai-pii-detection";
 
 interface AuthenticatedUser {
   id: string;
@@ -25,7 +26,7 @@ interface WebSocketClient extends WebSocket {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Session middleware
   app.use(session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    secret: process.env.SESSION_SECRET || require('crypto').randomBytes(32).toString('hex'),
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
@@ -320,6 +321,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
   }
+
+  // PII Detection endpoint
+  app.post('/api/detect-pii', requireAuth, async (req, res) => {
+    try {
+      const { text, userAge } = req.body;
+      
+      if (!text || typeof text !== 'string') {
+        return res.status(400).json({ error: 'Text is required' });
+      }
+
+      const piiResult = await detectPIIWithAI(text);
+      
+      let warning = null;
+      if (piiResult.hasPII) {
+        warning = getAgeAppropriatePIIWarning(userAge, piiResult.detectedTypes);
+      }
+
+      res.json({
+        ...piiResult,
+        warning
+      });
+    } catch (error) {
+      console.error('PII detection error:', error);
+      res.status(500).json({ error: 'PII detection failed' });
+    }
+  });
 
   return httpServer;
 }

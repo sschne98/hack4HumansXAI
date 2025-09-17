@@ -9,7 +9,6 @@ import { OnlineStatus } from '@/components/ui/online-status';
 import { Send, Paperclip, MapPin, Mic, Video, Phone, Info, CheckCheck, MessageSquare } from 'lucide-react';
 import LocationModal from './location-modal';
 import PIIWarningModal from './pii-warning-modal';
-import { detectPII, getAgeAppropriatePIIWarning } from '@/lib/pii-detection';
 import type { MessageWithSender, ConversationWithLastMessage } from '@shared/schema';
 
 interface ChatAreaProps {
@@ -44,21 +43,29 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() || !conversationId || !user) return;
 
-    // Check for PII in the message
-    const piiResult = detectPII(message.trim());
-    
-    if (piiResult.hasPII) {
-      const warning = getAgeAppropriatePIIWarning(user.age, piiResult.detectedTypes);
-      if (warning) {
+    // Check for PII in the message using AI
+    try {
+      const response = await fetch('/api/detect-pii', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: message.trim(), userAge: user.age })
+      });
+      
+      const piiResult = await response.json();
+      
+      if (piiResult.hasPII && piiResult.warning) {
         setPendingMessage(message.trim());
-        setPIIWarningData(warning);
+        setPIIWarningData(piiResult.warning);
         setShowPIIWarning(true);
         return;
       }
+    } catch (error) {
+      console.error('PII detection failed:', error);
+      // Continue with message sending if PII detection fails
     }
 
     // Send message if no PII detected
