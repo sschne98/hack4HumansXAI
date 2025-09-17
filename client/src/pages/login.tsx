@@ -14,6 +14,7 @@ export default function LoginPage() {
     email: '',
     password: '',
     displayName: '',
+    age: '',
   });
   const { toast } = useToast();
 
@@ -29,6 +30,7 @@ export default function LoginPage() {
         await register({
           ...formData,
           username,
+          age: parseInt(formData.age),
         });
       }
     } catch (error: any) {
@@ -115,6 +117,24 @@ export default function LoginPage() {
                     onChange={handleInputChange}
                     required
                     data-testid="input-displayName"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="age" className="block text-sm font-medium text-foreground mb-2">
+                    Age
+                  </Label>
+                  <Input
+                    id="age"
+                    name="age"
+                    type="number"
+                    placeholder="25"
+                    value={formData.age}
+                    onChange={handleInputChange}
+                    required
+                    min="13"
+                    max="120"
+                    data-testid="input-age"
                   />
                 </div>
 
