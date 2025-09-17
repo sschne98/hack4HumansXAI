@@ -113,7 +113,13 @@ export function detectPII(text: string): PIIDetectionResult {
     /\b(enter|join).*?(contest|competition|giveaway).*?(fee|pay|cost|\$)\b/gi,
     /\b(win|get|receive).*?(free|prize|gift|skin|item).*?(fee|pay|cost|charge)\b/gi,
     /\b(gaming|fortnite|minecraft|roblox|steam|xbox|playstation).*?(skin|item|currency|vbucks|robux).*?(fee|pay|cost)\b/gi,
-    /\b(free).*?(skin|item|gift|prize).*?(only|just).*?(\$\d+|fee|pay|cost)\b/gi
+    /\b(free).*?(skin|item|gift|prize).*?(only|just).*?(\$\d+|fee|pay|cost)\b/gi,
+    
+    // Suspicious free gaming/contest offers (common scam hooks)
+    /\b(enter|join).*?(contest|competition|giveaway).*?(win|get|receive).*?(free|prize)\b/gi,
+    /\b(free|win).*?(fortnite|minecraft|roblox|steam|xbox|playstation|gaming).*?(skin|item|currency|vbucks|robux|credits)\b/gi,
+    /\b(contest|giveaway|competition).*?(fortnite|minecraft|roblox|gaming).*?(skin|item|prize|reward)\b/gi,
+    /\b(win|get|claim).*?(free).*?(galaxy skin|rare skin|exclusive skin|legendary skin|premium|vbucks|robux)\b/gi
   ];
 
   // Check phone numbers
