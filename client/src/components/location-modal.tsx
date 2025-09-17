@@ -81,7 +81,7 @@ export default function LocationModal({ open, onClose, onShareLocation }: Locati
     
     if (user.age < 18) {
       return {
-        title: "Location Sharing Safety",
+        title: "DigiGuard",
         message: "Sharing your location lets others know exactly where you are. Only share with people you trust, like family members. Never share your location with strangers or people you only know online. Your safety is the most important thing!"
       };
     } else if (user.age < 25) {
