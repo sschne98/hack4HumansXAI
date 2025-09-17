@@ -33,17 +33,26 @@ export function detectPII(text: string): PIIDetectionResult {
   // Credit card patterns (basic)
   const creditCardPattern = /\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g;
 
-  // Address patterns (basic - street numbers and common patterns)
+  // Address patterns (enhanced - street numbers, apartment numbers, zip codes)
   const addressPatterns = [
     /\b\d+\s+(north|south|east|west|n|s|e|w)?\s*\w+\s+(street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl)\b/gi,
-    /\b\d+\s+\w+\s+(street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl)\b/gi
+    /\b\d+\s+\w+\s+(street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl)\b/gi,
+    /\b\d+\s+[a-zA-Z\s]+(apt|apartment|unit|suite|ste)\s*#?\s*\d+\b/gi, // Apartment numbers
+    /\b\d{5}(-\d{4})?\b/g, // ZIP codes (5 digits or 5+4 format)
+    /\b[a-zA-Z\s]+,\s*[A-Z]{2}\s+\d{5}(-\d{4})?\b/g // City, State ZIP
   ];
 
-  // Date of birth patterns
+  // Date of birth/birthday patterns (enhanced)
   const dobPatterns = [
     /\b(0?[1-9]|1[0-2])\/(0?[1-9]|[12]\d|3[01])\/(19|20)\d{2}\b/g, // MM/DD/YYYY
     /\b(0?[1-9]|[12]\d|3[01])\/(0?[1-9]|1[0-2])\/(19|20)\d{2}\b/g, // DD/MM/YYYY
-    /\b(19|20)\d{2}-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01])\b/g // YYYY-MM-DD
+    /\b(19|20)\d{2}-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01])\b/g, // YYYY-MM-DD
+    /\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(0?[1-9]|[12]\d|3[01])(st|nd|rd|th)?,?\s+(19|20)\d{2}\b/gi, // "January 15th, 1990"
+    /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+(0?[1-9]|[12]\d|3[01])(st|nd|rd|th)?,?\s+(19|20)\d{2}\b/gi, // "Jan 15th, 1990"
+    /\b(0?[1-9]|[12]\d|3[01])(st|nd|rd|th)?\s+(january|february|march|april|may|june|july|august|september|october|november|december)\s+(19|20)\d{2}\b/gi, // "15th January 1990"
+    /\bborn\s+on\s+[^.!?]{1,30}(19|20)\d{2}/gi, // "born on [date]"
+    /\bbirthday\s+is\s+[^.!?]{1,30}(19|20)\d{2}/gi, // "birthday is [date]"
+    /\bmy\s+birthday\s+[^.!?]{1,30}(19|20)\d{2}/gi // "my birthday [date]"
   ];
 
   // Check phone numbers
@@ -97,7 +106,7 @@ export function detectPII(text: string): PIIDetectionResult {
     const matches = text.match(pattern);
     if (matches) {
       result.hasPII = true;
-      result.detectedTypes.push('date of birth');
+      result.detectedTypes.push('birthday');
       result.matchedText.push(...matches);
     }
   });

@@ -348,6 +348,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test PII Detection endpoint (no auth required for testing)
+  app.post('/api/test-pii', async (req, res) => {
+    try {
+      const { text, userAge } = req.body;
+      
+      if (!text || typeof text !== 'string') {
+        return res.status(400).json({ error: 'Text is required' });
+      }
+
+      console.log(`Testing PII detection for text: "${text}"`);
+      const piiResult = await detectPIIWithAI(text);
+      
+      let warning = null;
+      if (piiResult.hasPII) {
+        warning = getAgeAppropriatePIIWarning(userAge, piiResult.detectedTypes);
+      }
+
+      const result = {
+        ...piiResult,
+        warning,
+        testMode: true
+      };
+
+      console.log('PII detection result:', JSON.stringify(result, null, 2));
+      res.json(result);
+    } catch (error) {
+      console.error('PII detection error:', error);
+      res.status(500).json({ error: 'PII detection failed' });
+    }
+  });
+
 
   return httpServer;
 }

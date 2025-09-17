@@ -38,12 +38,13 @@ Analyze the following text and identify any PII including:
 - Phone numbers (any format)
 - Social Security Numbers
 - Credit card numbers
-- Home/mailing addresses
+- Home/mailing addresses (street addresses, apartment numbers, zip codes)
 - Driver's license numbers
 - Passport numbers
-- Date of birth
+- Date of birth/birthday (any date that could be someone's birthday)
 - Government ID numbers
 - Bank account numbers
+- Physical addresses (including partial addresses like "123 Main Street" or "New York, NY 10001")
 
 Return your analysis as JSON with this exact format:
 {
