@@ -132,7 +132,7 @@ export default function LoginPage() {
                     value={formData.age}
                     onChange={handleInputChange}
                     required
-                    min="13"
+                    min="10"
                     max="120"
                     data-testid="input-age"
                   />
