@@ -375,10 +375,18 @@ export default function ChatArea({ conversationId, onBackToSidebar }: ChatAreaPr
                             {/* Mobile-optimized layout */}
                             <div className="flex flex-col sm:flex-row sm:items-start space-y-2 sm:space-y-0 sm:space-x-3">
                               {/* Header with icon and branding */}
-                              <div className="flex items-center space-x-2 flex-shrink-0">
-                                <AlertTriangle className="h-5 w-5 sm:h-4 sm:w-4 text-orange-600" />
-                                <span className="text-sm sm:text-sm font-semibold text-orange-800">DigiGuard</span>
-                                <span className="text-sm sm:text-sm font-semibold text-orange-800">🚨 Safety Alert</span>
+                              <div className="flex-shrink-0">
+                                {/* First line: Icon + DigiGuard */}
+                                <div className="flex items-center space-x-2">
+                                  <AlertTriangle className="h-5 w-5 sm:h-4 sm:w-4 text-orange-600" />
+                                  <span className="text-sm font-semibold text-orange-800">DigiGuard</span>
+                                  {/* Show Safety Alert on same line for desktop */}
+                                  <span className="hidden sm:inline text-sm font-semibold text-orange-800">🚨 Safety Alert</span>
+                                </div>
+                                {/* Second line: Safety Alert for mobile only */}
+                                <div className="sm:hidden mt-1 ml-7">
+                                  <span className="text-sm font-semibold text-orange-800">🚨 Safety Alert</span>
+                                </div>
                               </div>
                               
                               {/* Warning content */}
