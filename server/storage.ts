@@ -114,12 +114,11 @@ export class MemStorage implements IStorage {
       const lastMessage = messages[0];
       const unreadCount = await this.getUnreadMessageCount(conversation.id, userId);
       
-      const otherParticipants = await Promise.all(
+      const otherParticipants = (await Promise.all(
         conversation.participants
           .filter(id => id !== userId)
           .map(id => this.getUser(id))
-          .filter(Boolean)
-      ) as User[];
+      )).filter(Boolean) as User[];
 
       result.push({
         ...conversation,

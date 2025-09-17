@@ -159,9 +159,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session.user!.id;
       const { participantId } = req.body;
       
+      console.log(`Creating conversation between ${userId} and ${participantId}`);
+      
+      // Validate that both users exist
+      const currentUser = await storage.getUser(userId);
+      const otherUser = await storage.getUser(participantId);
+      
+      if (!currentUser || !otherUser) {
+        return res.status(400).json({ message: "One or both users not found" });
+      }
+      
       const conversation = await storage.findOrCreateDirectConversation(userId, participantId);
+      console.log(`Created conversation:`, conversation);
       res.json(conversation);
     } catch (error: any) {
+      console.error('Conversation creation error:', error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -171,6 +183,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const conversationId = req.params.id;
     const messages = await storage.getConversationMessages(conversationId);
     res.json(messages);
+  });
+
+  app.post("/api/conversations/:id/messages", requireAuth, async (req, res) => {
+    try {
+      const conversationId = req.params.id;
+      const userId = req.session.user!.id;
+      
+      console.log(`Creating message in conversation ${conversationId} from user ${userId}`);
+      
+      // Validate conversation exists
+      const conversation = await storage.getConversation(conversationId);
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      // Validate user is participant
+      if (!conversation.participants.includes(userId)) {
+        return res.status(403).json({ message: "User not a participant in this conversation" });
+      }
+      
+      const messageData = insertMessageSchema.parse({
+        ...req.body,
+        conversationId,
+        senderId: userId,
+      });
+      
+      const newMessage = await storage.createMessage(messageData);
+      const messageWithSender = {
+        ...newMessage,
+        sender: await storage.getUser(newMessage.senderId),
+      };
+      
+      console.log(`Created message:`, newMessage);
+      res.json(messageWithSender);
+    } catch (error: any) {
+      console.error('Message creation error:', error);
+      res.status(400).json({ message: error.message });
+    }
   });
 
   const httpServer = createServer(app);

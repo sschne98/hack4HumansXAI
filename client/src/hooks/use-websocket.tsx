@@ -106,8 +106,9 @@ export function useWebSocket() {
     };
   }, [user, queryClient]);
 
-  const sendMessage = (conversationId: string, content: string, messageType = 'text', metadata?: any) => {
+  const sendMessage = async (conversationId: string, content: string, messageType = 'text', metadata?: any) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && user) {
+      // Send via WebSocket if connected
       wsRef.current.send(JSON.stringify({
         type: 'message',
         conversationId,
@@ -116,6 +117,32 @@ export function useWebSocket() {
         messageType,
         metadata,
       }));
+    } else if (user) {
+      // Fallback to HTTP API if WebSocket unavailable
+      try {
+        const response = await fetch(`/api/conversations/${conversationId}/messages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content, messageType, metadata }),
+          credentials: 'include',
+        });
+        
+        if (response.ok) {
+          const messageWithSender = await response.json();
+          // Add message to cache manually since WebSocket isn't available
+          queryClient.setQueryData<MessageWithSender[]>(
+            ['/api/conversations', conversationId, 'messages'],
+            (old = []) => [...old, messageWithSender]
+          );
+          
+          // Invalidate conversations to update last message
+          queryClient.invalidateQueries({
+            queryKey: ['/api/conversations']
+          });
+        }
+      } catch (error) {
+        console.error('Failed to send message via HTTP:', error);
+      }
     }
   };
 
