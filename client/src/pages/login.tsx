@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { MessageSquare } from 'lucide-react';
+import digiGuardLogo from "@assets/generated-image (7)_1758119502541.png";
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
@@ -62,8 +62,12 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-2xl">
         <CardContent className="p-8">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-              <MessageSquare className="text-white text-2xl" />
+            <div className="w-20 h-20 mx-auto mb-4">
+              <img 
+                src={digiGuardLogo} 
+                alt="DigiGuard Logo" 
+                className="w-full h-full object-contain rounded-full"
+              />
             </div>
             <h1 className="text-3xl font-bold text-foreground">DigiGuard</h1>
             <p className="text-muted-foreground mt-2">Safe messaging for everyone</p>
