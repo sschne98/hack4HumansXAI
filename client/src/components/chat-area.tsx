@@ -314,12 +314,6 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
                       </div>
                     ) : shouldBlurMessage(msg) ? (
                       <div className="space-y-3">
-                        <div className="relative">
-                          <p className="text-foreground blur-sm select-none pointer-events-none">
-                            {msg.content}
-                          </p>
-                          <div className="absolute inset-0 bg-black/10 rounded" />
-                        </div>
                         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                           <EyeOff className="h-4 w-4" />
                           <span>This message may contain inappropriate content</span>
