@@ -106,7 +106,14 @@ export function detectPII(text: string): PIIDetectionResult {
     
     // Prize/gift scams
     /\b(congratulations|selected|chosen|winner).*?(prize|gift|reward|bonus)\b/gi,
-    /\b(claim|collect).*?(prize|reward|gift).*?(fee|shipping|handling)\b/gi
+    /\b(claim|collect).*?(prize|reward|gift).*?(fee|shipping|handling)\b/gi,
+    
+    // Contest/competition scams with entry fees
+    /\b(contest|competition|giveaway|raffle).*?(fee|cost|pay|charge|entry fee)\b/gi,
+    /\b(enter|join).*?(contest|competition|giveaway).*?(fee|pay|cost|\$)\b/gi,
+    /\b(win|get|receive).*?(free|prize|gift|skin|item).*?(fee|pay|cost|charge)\b/gi,
+    /\b(gaming|fortnite|minecraft|roblox|steam|xbox|playstation).*?(skin|item|currency|vbucks|robux).*?(fee|pay|cost)\b/gi,
+    /\b(free).*?(skin|item|gift|prize).*?(only|just).*?(\$\d+|fee|pay|cost)\b/gi
   ];
 
   // Check phone numbers
