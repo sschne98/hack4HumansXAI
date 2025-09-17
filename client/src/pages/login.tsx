@@ -65,8 +65,8 @@ export default function LoginPage() {
             <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
               <MessageSquare className="text-white text-2xl" />
             </div>
-            <h1 className="text-3xl font-bold text-foreground">Telekom Messenger</h1>
-            <p className="text-muted-foreground mt-2">Connect with your team</p>
+            <h1 className="text-3xl font-bold text-foreground">DigiGuard</h1>
+            <p className="text-muted-foreground mt-2">Safe messaging for everyone</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6" data-testid="auth-form">
@@ -78,7 +78,7 @@ export default function LoginPage() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="your.email@telekom.com"
+                placeholder="your.email@example.com"
                 value={formData.email}
                 onChange={handleInputChange}
                 required
