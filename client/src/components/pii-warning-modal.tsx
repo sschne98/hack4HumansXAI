@@ -30,13 +30,6 @@ export default function PIIWarningModal({
               className="w-full h-full object-contain rounded-full"
             />
           </div>
-          <DialogTitle className="text-xl font-semibold text-gray-800 mb-1">
-            Hey! Let's keep you safe 
-          </DialogTitle>
-          <div className="flex items-center justify-center gap-1 text-sm text-gray-600">
-            <Heart className="h-4 w-4 text-red-400" />
-            <span>Your privacy matters</span>
-          </div>
         </DialogHeader>
 
         <Alert className="border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl">
