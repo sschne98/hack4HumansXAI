@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useLocation } from 'wouter';
 import { useWebSocket } from '@/hooks/use-websocket';
+import { useIsMobile } from '@/hooks/use-mobile';
 import Sidebar from '@/components/sidebar';
 import ChatArea from '@/components/chat-area';
 
@@ -9,6 +10,7 @@ export default function MessengerPage() {
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { isConnected } = useWebSocket();
+  const isMobile = useIsMobile();
   const [selectedConversationId, setSelectedConversationId] = useState<string | undefined>();
 
   useEffect(() => {
@@ -29,6 +31,10 @@ export default function MessengerPage() {
     return null;
   }
 
+  // On mobile, hide sidebar when chat is opened
+  const showSidebar = !isMobile || !selectedConversationId;
+  const showChatArea = !isMobile || selectedConversationId;
+
   return (
     <div className="h-screen flex" data-testid="messenger-app">
       {!isConnected && (
@@ -37,11 +43,19 @@ export default function MessengerPage() {
         </div>
       )}
       
-      <Sidebar 
-        selectedConversationId={selectedConversationId}
-        onSelectConversation={setSelectedConversationId}
-      />
-      <ChatArea conversationId={selectedConversationId} />
+      {showSidebar && (
+        <Sidebar 
+          selectedConversationId={selectedConversationId}
+          onSelectConversation={setSelectedConversationId}
+        />
+      )}
+      
+      {showChatArea && (
+        <ChatArea 
+          conversationId={selectedConversationId}
+          onBackToSidebar={isMobile ? () => setSelectedConversationId(undefined) : undefined}
+        />
+      )}
     </div>
   );
 }

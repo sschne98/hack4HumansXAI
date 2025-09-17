@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { OnlineStatus } from '@/components/ui/online-status';
-import { Send, Paperclip, MapPin, Mic, Video, Phone, Info, CheckCheck, MessageSquare, Eye, EyeOff } from 'lucide-react';
+import { Send, Paperclip, MapPin, Mic, Video, Phone, Info, CheckCheck, MessageSquare, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import LocationModal from './location-modal';
 import PIIWarningModal from './pii-warning-modal';
 import { detectPII } from '@/lib/pii-detection';
@@ -14,9 +14,10 @@ import type { MessageWithSender, ConversationWithLastMessage } from '@shared/sch
 
 interface ChatAreaProps {
   conversationId?: string;
+  onBackToSidebar?: () => void;
 }
 
-export default function ChatArea({ conversationId }: ChatAreaProps) {
+export default function ChatArea({ conversationId, onBackToSidebar }: ChatAreaProps) {
   const { user } = useAuth();
   const { sendMessage, sendTypingIndicator, typingUsers } = useWebSocket();
   const [message, setMessage] = useState('');
@@ -218,6 +219,17 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
         <div className="p-4 border-b border-border bg-card">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
+              {onBackToSidebar && (
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={onBackToSidebar}
+                  data-testid="button-back-to-sidebar"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+              )}
+              
               {activeConversation.isGroup ? (
                 <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                   <Info className="h-5 w-5 text-white" />
