@@ -42,6 +42,18 @@ export function detectPII(text: string): PIIDetectionResult {
     /\b[a-zA-Z\s]+,\s*[A-Z]{2}\s+\d{5}(-\d{4})?\b/g // City, State ZIP
   ];
 
+  // Profanity patterns (basic - common swear words and variations)
+  const profanityPatterns = [
+    // Basic swear words with variations (including -ing, -ed, etc.)
+    /\b(fuck|fucking|fucked|fucker|shit|shitting|damn|hell|bitch|bitching|ass|crap|crappy)\b/gi,
+    // Common replacements with asterisks
+    /\b(f\*ck|f\*\*k|sh\*t|d\*mn|h\*ll|b\*tch|\*ss|cr\*p)\b/gi,
+    // L33t speak variations
+    /\b(f[u0]ck|sh[i1]t|d[a4]mn|h[e3]ll|b[i1]tch|[a4]ss|cr[a4]p)\b/gi,
+    // Partial censoring patterns  
+    /\b(f[\*#@$%]+ck?|sh[\*#@$%]+t|d[\*#@$%]+mn?|b[\*#@$%]+tch)\b/gi
+  ];
+
   // Date of birth/birthday patterns (enhanced)
   const dobPatterns = [
     /\b(0?[1-9]|1[0-2])\/(0?[1-9]|[12]\d|3[01])\/(19|20)\d{2}\b/g, // MM/DD/YYYY
@@ -107,6 +119,16 @@ export function detectPII(text: string): PIIDetectionResult {
     if (matches) {
       result.hasPII = true;
       result.detectedTypes.push('birthday');
+      result.matchedText.push(...matches);
+    }
+  });
+
+  // Check profanity
+  profanityPatterns.forEach(pattern => {
+    const matches = text.match(pattern);
+    if (matches) {
+      result.hasPII = true;
+      result.detectedTypes.push('profanity');
       result.matchedText.push(...matches);
     }
   });

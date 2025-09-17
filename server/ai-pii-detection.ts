@@ -32,7 +32,7 @@ export async function detectPIIWithAI(text: string): Promise<AIPIIDetectionResul
   try {
     const systemPrompt = `You are a privacy protection expert specializing in detecting personally identifiable information (PII) in text messages.
 
-Analyze the following text and identify any PII including:
+Analyze the following text and identify any PII or inappropriate content including:
 - Full names (first and last names together)
 - Email addresses
 - Phone numbers (any format)
@@ -45,6 +45,7 @@ Analyze the following text and identify any PII including:
 - Government ID numbers
 - Bank account numbers
 - Physical addresses (including partial addresses like "123 Main Street" or "New York, NY 10001")
+- Profanity or swear words (mild to strong offensive language)
 
 Return your analysis as JSON with this exact format:
 {
@@ -131,24 +132,51 @@ function convertPatternResultToAI(patternResult: PIIDetectionResult): AIPIIDetec
 export function getAgeAppropriatePIIWarning(age: number | undefined, detectedTypes: string[]) {
   if (!age || detectedTypes.length === 0) return null;
   
-  const typesText = detectedTypes.length > 1 
-    ? `${detectedTypes.slice(0, -1).join(', ')} and ${detectedTypes[detectedTypes.length - 1]}`
-    : detectedTypes[0];
+  // Handle profanity separately from PII
+  const hasProfanity = detectedTypes.includes('profanity');
+  const piiTypes = detectedTypes.filter(type => type !== 'profanity');
+  
+  if (hasProfanity && piiTypes.length === 0) {
+    // Only profanity detected
+    if (age < 18) {
+      return {
+        title: "DigiGuard",
+        message: "We noticed your message contains inappropriate language. Using swear words online can get you in trouble with teachers, parents, or get your account banned. It's better to express yourself in a positive way that won't hurt your reputation or relationships!"
+      };
+    } else if (age < 25) {
+      return {
+        title: "DigiGuard", 
+        message: "Your message contains profanity. Using offensive language online can damage your professional reputation, affect job opportunities, and may violate platform rules. Consider rephrasing your message more professionally."
+      };
+    } else {
+      return {
+        title: "DigiGuard",
+        message: "Your message contains profanity. Offensive language can damage your professional reputation, create legal issues in workplace communications, and may result in account restrictions. Please consider using more appropriate language."
+      };
+    }
+  }
+  
+  // Handle PII (with or without profanity)
+  const typesText = piiTypes.length > 1 
+    ? `${piiTypes.slice(0, -1).join(', ')} and ${piiTypes[piiTypes.length - 1]}`
+    : piiTypes[0];
+    
+  const profanityNote = hasProfanity ? " Also, your message contains inappropriate language which could further compromise your safety and reputation." : "";
 
   if (age < 18) {
     return {
       title: "DigiGuard",
-      message: `We noticed you're about to share your ${typesText}. This is personal information that could be used to find or contact you in real life. Never share personal details with strangers online. Only share this information with trusted family members. Your safety is the most important thing!`
+      message: `We noticed you're about to share your ${typesText}. This is personal information that could be used to find or contact you in real life. Never share personal details with strangers online. Only share this information with trusted family members. Your safety is the most important thing!${profanityNote}`
     };
   } else if (age < 25) {
     return {
       title: "DigiGuard",
-      message: `Your message contains ${typesText}. Sharing personal information online can put your privacy and security at risk. Think carefully about who you're sharing this with and whether they really need this information.`
+      message: `Your message contains ${typesText}. Sharing personal information online can put your privacy and security at risk. Think carefully about who you're sharing this with and whether they really need this information.${profanityNote}`
     };
   } else {
     return {
       title: "DigiGuard",
-      message: `Your message contains ${typesText}. Sharing personal information in digital communications can expose you to privacy risks, identity theft, and unwanted contact. Please verify that all recipients need and can be trusted with this information.`
+      message: `Your message contains ${typesText}. Sharing personal information in digital communications can expose you to privacy risks, identity theft, and unwanted contact. Please verify that all recipients need and can be trusted with this information.${profanityNote}`
     };
   }
 }
