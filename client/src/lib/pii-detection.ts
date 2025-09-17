@@ -103,8 +103,8 @@ export function detectPII(text: string): PIIDetectionResult {
   });
 
   // Remove duplicates
-  result.detectedTypes = [...new Set(result.detectedTypes)];
-  result.matchedText = [...new Set(result.matchedText)];
+  result.detectedTypes = Array.from(new Set(result.detectedTypes));
+  result.matchedText = Array.from(new Set(result.matchedText));
 
   return result;
 }

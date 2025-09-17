@@ -1,8 +1,19 @@
 // AI-based PII Detection Service using Gemini
 // This integration uses the javascript_gemini blueprint for secure API key management
 import { GoogleGenAI } from "@google/genai";
+import { detectPII, PIIDetectionResult } from "../client/src/lib/pii-detection";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+// Initialize AI client with proper validation
+const initializeAI = () => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey.trim() === "") {
+    console.warn("GEMINI_API_KEY is not configured. AI PII detection will fallback to pattern matching.");
+    return null;
+  }
+  return new GoogleGenAI({ apiKey });
+};
+
+const ai = initializeAI();
 
 export interface AIPIIDetectionResult {
   hasPII: boolean;
@@ -12,6 +23,12 @@ export interface AIPIIDetectionResult {
 }
 
 export async function detectPIIWithAI(text: string): Promise<AIPIIDetectionResult> {
+  // If no AI client is available, fallback to pattern-based detection immediately
+  if (!ai) {
+    console.log('AI client not available, using pattern-based PII detection');
+    return convertPatternResultToAI(detectPII(text));
+  }
+
   try {
     const systemPrompt = `You are a privacy protection expert specializing in detecting personally identifiable information (PII) in text messages.
 
@@ -65,32 +82,49 @@ Be conservative - it's better to flag potential PII than miss it. Only include i
 
     const rawJson = response.text;
     
-    if (rawJson) {
-      const result: AIPIIDetectionResult = JSON.parse(rawJson);
-      
-      // Validate the result structure
-      if (typeof result.hasPII !== 'boolean' || 
-          !Array.isArray(result.detectedTypes) || 
-          !Array.isArray(result.matchedText) ||
-          typeof result.confidence !== 'number') {
-        throw new Error('Invalid response format from AI');
-      }
-      
-      return result;
-    } else {
+    if (!rawJson || rawJson.trim() === "") {
       throw new Error("Empty response from Gemini API");
     }
-  } catch (error) {
-    console.error('AI PII Detection error:', error);
     
-    // Fallback to basic pattern detection if AI fails
-    return {
-      hasPII: false,
-      detectedTypes: [],
-      matchedText: [],
-      confidence: 0
-    };
+    let result: AIPIIDetectionResult;
+    try {
+      result = JSON.parse(rawJson);
+    } catch (parseError) {
+      console.error('Failed to parse AI response:', parseError);
+      throw new Error('Invalid JSON response from AI');
+    }
+    
+    // Validate the result structure
+    if (typeof result.hasPII !== 'boolean' || 
+        !Array.isArray(result.detectedTypes) || 
+        !Array.isArray(result.matchedText) ||
+        typeof result.confidence !== 'number') {
+      throw new Error('Invalid response format from AI');
+    }
+    
+    console.log(`AI PII Detection successful: ${result.hasPII ? 'PII detected' : 'No PII detected'}`);
+    return result;
+    
+  } catch (error) {
+    console.error('AI PII Detection failed, using pattern-based fallback:', error);
+    
+    // Fallback to pattern-based detection when AI fails
+    const patternResult = detectPII(text);
+    const fallbackResult = convertPatternResultToAI(patternResult);
+    
+    console.log(`Pattern-based fallback result: ${fallbackResult.hasPII ? 'PII detected' : 'No PII detected'}`);
+    return fallbackResult;
   }
+}
+
+// Helper function to convert pattern-based result to AI result format
+function convertPatternResultToAI(patternResult: PIIDetectionResult): AIPIIDetectionResult {
+  return {
+    hasPII: patternResult.hasPII,
+    detectedTypes: patternResult.detectedTypes,
+    matchedText: patternResult.matchedText,
+    confidence: patternResult.hasPII ? 0.8 : 1.0 // High confidence for pattern matches, full confidence for no matches
+  };
 }
 
 export function getAgeAppropriatePIIWarning(age: number | undefined, detectedTypes: string[]) {
