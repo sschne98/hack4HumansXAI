@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { OnlineStatus } from '@/components/ui/online-status';
-import { Send, Paperclip, MapPin, Mic, Video, Phone, Info, CheckCheck, MessageSquare, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Send, Paperclip, MapPin, Mic, Video, Phone, Info, CheckCheck, MessageSquare, Eye, EyeOff, ArrowLeft, AlertTriangle } from 'lucide-react';
 import LocationModal from './location-modal';
 import PIIWarningModal from './pii-warning-modal';
 import { detectPII } from '@/lib/pii-detection';
@@ -133,6 +133,12 @@ export default function ChatArea({ conversationId, onBackToSidebar }: ChatAreaPr
     return piiResult.detectedTypes.includes('profanity');
   };
 
+  // Check if message contains scam patterns
+  const messageContainsScam = (content: string) => {
+    const piiResult = detectPII(content);
+    return piiResult.detectedTypes.includes('scam');
+  };
+
   // Handle revealing a blurred message
   const handleRevealMessage = (messageId: string) => {
     setRevealedMessages(prev => new Set(prev).add(messageId));
@@ -148,6 +154,18 @@ export default function ChatArea({ conversationId, onBackToSidebar }: ChatAreaPr
     
     // Check if message contains profanity and hasn't been revealed
     return messageContainsProfanity(msg.content) && !revealedMessages.has(msg.id);
+  };
+
+  // Check if message should show scam warning
+  const shouldShowScamWarning = (msg: MessageWithSender) => {
+    // Only show for incoming messages (not own messages)
+    if (msg.senderId === user?.id) return false;
+    
+    // Only show for text messages
+    if (msg.messageType === 'location') return false;
+    
+    // Check if message contains scam patterns
+    return messageContainsScam(msg.content);
   };
 
   const handleShareLocation = (location: { lat: number; lng: number; address: string }) => {
@@ -344,9 +362,27 @@ export default function ChatArea({ conversationId, onBackToSidebar }: ChatAreaPr
                         </div>
                       </div>
                     ) : (
-                      <p className={isOwnMessage ? 'text-white' : 'text-foreground'}>
-                        {msg.content}
-                      </p>
+                      <div className="space-y-2">
+                        <p className={isOwnMessage ? 'text-white' : 'text-foreground'}>
+                          {msg.content}
+                        </p>
+                        
+                        {shouldShowScamWarning(msg) && (
+                          <div className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg p-3 mt-2">
+                            <div className="flex items-start space-x-2">
+                              <AlertTriangle className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                              <div className="space-y-1">
+                                <div className="text-sm font-medium text-orange-800">
+                                  🚨 Potential Scam Detected
+                                </div>
+                                <div className="text-xs text-orange-700">
+                                  This message contains patterns commonly used in scams. Be cautious of requests for money, personal information, or urgent actions.
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                   

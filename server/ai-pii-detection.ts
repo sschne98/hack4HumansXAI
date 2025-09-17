@@ -30,9 +30,9 @@ export async function detectPIIWithAI(text: string): Promise<AIPIIDetectionResul
   }
 
   try {
-    const systemPrompt = `You are a privacy protection expert specializing in detecting personally identifiable information (PII) in text messages.
+    const systemPrompt = `You are a privacy protection and safety expert specializing in detecting personally identifiable information (PII) and potential scams in text messages.
 
-Analyze the following text and identify any PII or inappropriate content including:
+Analyze the following text and identify any PII, inappropriate content, or potential scams including:
 - Full names (first and last names together)
 - Email addresses
 - Phone numbers (any format)
@@ -46,6 +46,15 @@ Analyze the following text and identify any PII or inappropriate content includi
 - Bank account numbers
 - Physical addresses (including partial addresses like "123 Main Street" or "New York, NY 10001")
 - Profanity or swear words (mild to strong offensive language)
+- SCAM PATTERNS including:
+  * Financial scams (urgent money requests, lottery winnings, investment schemes)
+  * Phishing attempts (fake account verification, credential requests)
+  * Romance scams (love interest asking for money or help)
+  * Tech support scams (fake computer problems, remote access requests)
+  * Authority impersonation (fake government, bank, or law enforcement)
+  * Urgency tactics (limited time offers, pressure to act immediately)
+  * Cryptocurrency scams (fake investment opportunities, wallet requests)
+  * Prize/gift scams (fake contests, claiming rewards with fees)
 
 Return your analysis as JSON with this exact format:
 {
@@ -55,7 +64,7 @@ Return your analysis as JSON with this exact format:
   "confidence": number between 0 and 1
 }
 
-Be conservative - it's better to flag potential PII than miss it. Only include items you're confident are PII.`;
+Be conservative - it's better to flag potential PII or scams than miss them. For scams, look for common patterns like urgency, requests for money/personal info, impersonation, and too-good-to-be-true offers.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",

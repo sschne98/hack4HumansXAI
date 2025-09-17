@@ -67,6 +67,48 @@ export function detectPII(text: string): PIIDetectionResult {
     /\bmy\s+birthday\s+[^.!?]{1,30}(19|20)\d{2}/gi // "my birthday [date]"
   ];
 
+  // Scam detection patterns
+  const scamPatterns = [
+    // Financial scams
+    /\b(urgent|immediate).*?(money|cash|payment|transfer|wire|fund)\b/gi,
+    /\b(lottery|prize|winner|jackpot).*?(million|thousand|\$|\€|\£)\b/gi,
+    /\b(investment|trading|profit|return).*?(guaranteed|risk-free|double|triple)\b/gi,
+    /\b(pay|send|transfer).*?(fee|tax|charge).*?(release|unlock|claim)\b/gi,
+    
+    // Phishing and credential theft
+    /\b(verify|confirm|update).*?(account|password|credentials|login)\b/gi,
+    /\b(suspended|blocked|locked).*?(account|card|profile)\b/gi,
+    /\b(click|visit).*?(link|url).*?(verify|confirm|secure)\b/gi,
+    /\b(enter|provide).*?(ssn|social security|pin|password|credit card)\b/gi,
+    
+    // Romance/relationship scams
+    /\b(love|darling|honey).*?(money|help|emergency|surgery|hospital)\b/gi,
+    /\b(marry|relationship).*?(visa|immigration|travel|money)\b/gi,
+    /\b(stranded|stuck|airport|hospital).*?(money|help|wire|send)\b/gi,
+    
+    // Tech support scams
+    /\b(computer|pc|virus|malware|hacked).*?(remote|access|control|fix)\b/gi,
+    /\b(microsoft|windows|apple|google).*?(support|technician|security)\b/gi,
+    /\b(install|download).*?(software|program|app).*?(fix|repair|clean)\b/gi,
+    
+    // Authority impersonation
+    /\b(irs|fbi|police|government|bank|court).*?(investigation|audit|warrant|legal)\b/gi,
+    /\b(arrest|jail|fine|penalty).*?(avoid|prevent|stop).*?(payment|money)\b/gi,
+    
+    // Urgency and pressure tactics
+    /\b(act now|limited time|expires soon|today only|last chance)\b/gi,
+    /\b(don't tell|keep secret|confidential|private|between us)\b/gi,
+    /\b(act fast|hurry|quick|immediately|asap).*?(before|expires|ends)\b/gi,
+    
+    // Cryptocurrency/crypto scams
+    /\b(bitcoin|cryptocurrency|crypto|blockchain).*?(investment|mining|profit|wallet)\b/gi,
+    /\b(send|transfer).*?(bitcoin|crypto|wallet address|private key)\b/gi,
+    
+    // Prize/gift scams
+    /\b(congratulations|selected|chosen|winner).*?(prize|gift|reward|bonus)\b/gi,
+    /\b(claim|collect).*?(prize|reward|gift).*?(fee|shipping|handling)\b/gi
+  ];
+
   // Check phone numbers
   phonePatterns.forEach(pattern => {
     const matches = text.match(pattern);
@@ -133,6 +175,16 @@ export function detectPII(text: string): PIIDetectionResult {
     }
   });
 
+  // Check scam patterns
+  scamPatterns.forEach(pattern => {
+    const matches = text.match(pattern);
+    if (matches) {
+      result.hasPII = true;
+      result.detectedTypes.push('scam');
+      result.matchedText.push(...matches);
+    }
+  });
+
   // Remove duplicates
   result.detectedTypes = Array.from(new Set(result.detectedTypes));
   result.matchedText = Array.from(new Set(result.matchedText));
@@ -142,6 +194,14 @@ export function detectPII(text: string): PIIDetectionResult {
 
 export function getAgeAppropriatePIIWarning(age: number | undefined, detectedTypes: string[]) {
   if (!age) return null;
+  
+  // Handle scam detection separately
+  if (detectedTypes.includes('scam')) {
+    return {
+      title: "🚨 DigiGuard Scam Alert",
+      message: "This message contains patterns commonly used in scams or fraud attempts. Be very cautious - never send money, share personal information, or click suspicious links from unknown contacts. When in doubt, verify through a different communication method."
+    };
+  }
   
   const typesText = detectedTypes.length > 1 
     ? `${detectedTypes.slice(0, -1).join(', ')} and ${detectedTypes[detectedTypes.length - 1]}`
