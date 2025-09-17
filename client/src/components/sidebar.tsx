@@ -175,11 +175,6 @@ export default function Sidebar({ selectedConversationId, onSelectConversation }
                   
                   
                   <div className="flex items-center justify-between mt-1">
-                    {!conversation.isGroup && conversation.otherParticipants.length === 1 && (
-                      <span className="text-xs text-primary">
-                        Team Member
-                      </span>
-                    )}
                     {conversation.isGroup && (
                       <span className="text-xs text-primary">
                         Group • {conversation.participants.length} members
