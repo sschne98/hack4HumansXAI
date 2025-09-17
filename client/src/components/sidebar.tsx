@@ -173,18 +173,11 @@ export default function Sidebar({ selectedConversationId, onSelectConversation }
                     </span>
                   </div>
                   
-                  {conversation.lastMessage && (
-                    <p className="text-sm text-muted-foreground truncate">
-                      {conversation.lastMessage.messageType === 'location' 
-                        ? '📍 Location shared'
-                        : conversation.lastMessage.content}
-                    </p>
-                  )}
                   
                   <div className="flex items-center justify-between mt-1">
                     {!conversation.isGroup && conversation.otherParticipants.length === 1 && (
                       <span className="text-xs text-primary">
-                        {conversation.otherParticipants[0].department || 'Team Member'}
+                        Team Member
                       </span>
                     )}
                     {conversation.isGroup && (
