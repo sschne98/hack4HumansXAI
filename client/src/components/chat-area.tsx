@@ -8,6 +8,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { OnlineStatus } from '@/components/ui/online-status';
 import { Send, Paperclip, MapPin, Mic, Video, Phone, Info, CheckCheck, MessageSquare } from 'lucide-react';
 import LocationModal from './location-modal';
+import PIIWarningModal from './pii-warning-modal';
+import { detectPII, getAgeAppropriatePIIWarning } from '@/lib/pii-detection';
 import type { MessageWithSender, ConversationWithLastMessage } from '@shared/schema';
 
 interface ChatAreaProps {
@@ -19,6 +21,9 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
   const { sendMessage, sendTypingIndicator, typingUsers } = useWebSocket();
   const [message, setMessage] = useState('');
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showPIIWarning, setShowPIIWarning] = useState(false);
+  const [pendingMessage, setPendingMessage] = useState('');
+  const [piiWarningData, setPIIWarningData] = useState<{ title: string; message: string } | null>(null);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -43,15 +48,46 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
     e.preventDefault();
     if (!message.trim() || !conversationId || !user) return;
 
-    sendMessage(conversationId, message.trim());
+    // Check for PII in the message
+    const piiResult = detectPII(message.trim());
+    
+    if (piiResult.hasPII) {
+      const warning = getAgeAppropriatePIIWarning(user.age, piiResult.detectedTypes);
+      if (warning) {
+        setPendingMessage(message.trim());
+        setPIIWarningData(warning);
+        setShowPIIWarning(true);
+        return;
+      }
+    }
+
+    // Send message if no PII detected
+    sendMessageNow(message.trim());
+  };
+
+  const sendMessageNow = (messageText: string) => {
+    sendMessage(conversationId!, messageText);
     setMessage('');
+    setPendingMessage('');
 
     // Stop typing indicator
     if (typingTimeout) {
       clearTimeout(typingTimeout);
       setTypingTimeout(null);
     }
-    sendTypingIndicator(conversationId, false);
+    sendTypingIndicator(conversationId!, false);
+  };
+
+  const handlePIIWarningContinue = () => {
+    setShowPIIWarning(false);
+    sendMessageNow(pendingMessage);
+    setPIIWarningData(null);
+  };
+
+  const handlePIIWarningAbort = () => {
+    setShowPIIWarning(false);
+    setPendingMessage('');
+    setPIIWarningData(null);
   };
 
   const handleTyping = (value: string) => {
@@ -344,6 +380,16 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
         onClose={() => setShowLocationModal(false)}
         onShareLocation={handleShareLocation}
       />
+
+      {piiWarningData && (
+        <PIIWarningModal
+          open={showPIIWarning}
+          onClose={handlePIIWarningAbort}
+          onContinue={handlePIIWarningContinue}
+          title={piiWarningData.title}
+          message={piiWarningData.message}
+        />
+      )}
     </>
   );
 }
